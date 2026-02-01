@@ -223,6 +223,8 @@ describe("anchor-amm-q4-25", () => {
       tokenProgram: TOKEN_PROGRAM_ID
     }).signers([depositor]).rpc();
 
+    console.log("Your transaction signature", tx);
+
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     depositorMintXATAAccount = await getAccount(provider.connection, depositorATAX);
