@@ -99,7 +99,7 @@ impl<'info> Swap<'info> {
 
         self.deposit_tokens(is_x, deposit_amount)?;
 
-        self.withdraw_tokens(is_x, withdraw_amount)?;
+        self.withdraw_tokens(!is_x, withdraw_amount)?;
 
         Ok(())
     }

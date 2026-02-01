@@ -105,7 +105,7 @@ describe("anchor-amm-q4-25", () => {
 
   it("Is initialized!", async () => {
     // Add your test here.
-    const tx = await program.methods.initialize(seed, 10000, initializer).accountsStrict({
+    const tx = await program.methods.initialize(seed, 100, initializer).accountsStrict({
 
       initializer: initializer,
       mintX: mintX,
@@ -128,7 +128,7 @@ describe("anchor-amm-q4-25", () => {
 
     expect(configAccount.seed.toNumber()).to.equal(seed.toNumber());
 
-    expect(configAccount.fee).to.equal(10000);
+    expect(configAccount.fee).to.equal(100);
 
     expect(configAccount.mintX.toBase58()).to.equal(mintX.toBase58());
 
@@ -191,6 +191,53 @@ describe("anchor-amm-q4-25", () => {
     const depositorMintLPATAAccount = await getAccount(provider.connection, depositorMintLPATA);
 
     expect(depositorMintLPATAAccount.amount).to.equal(BigInt(5) * BigInt(10 ** 6));
+
+  });
+
+
+  it("Swap", async () => {
+
+    let depositorMintXATAAccount = await getAccount(provider.connection, depositorATAX);
+
+    let depositorMintYATAAccount = await getAccount(provider.connection, depositorATAY);
+
+    const depositorXAmountBefore = depositorMintXATAAccount.amount;
+
+    const depositorYAmountBefore = depositorMintYATAAccount.amount;
+
+    console.log(`The depositor currently has ${depositorXAmountBefore} amount of X tokens and ${depositorYAmountBefore} amount of Y tokens.`);
+
+    const tx = program.methods.swap(true, new anchor.BN(5 * (10 ** 6)), new anchor.BN(1 * (10 ** 6))).accountsStrict({
+
+      user: depositor.publicKey,
+      mintX: mintX,
+      mintY: mintY,
+      userX: depositorATAX,
+      userY: depositorATAY,
+      vaultX: vaultX,
+      vaultY: vaultY,
+      config: configPDA,
+      mintLp: mintLP,
+      systemProgram: anchor.web3.SystemProgram.programId,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      tokenProgram: TOKEN_PROGRAM_ID
+    }).signers([depositor]).rpc();
+
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    depositorMintXATAAccount = await getAccount(provider.connection, depositorATAX);
+
+    depositorMintYATAAccount = await getAccount(provider.connection, depositorATAY);
+
+    const depositorXAmountNow = depositorMintXATAAccount.amount;
+
+    const depositorYAmountNow = depositorMintYATAAccount.amount;
+
+    console.log(`The depositor currently has ${depositorXAmountNow} amount of X tokens and ${depositorYAmountNow} amount of Y tokens.`);
+
+    expect(Number(depositorYAmountNow)).to.greaterThan(Number(depositorYAmountBefore));
+
+    expect(Number(depositorXAmountNow)).to.lessThan(Number(depositorXAmountBefore));
 
   });
 
