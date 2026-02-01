@@ -165,4 +165,33 @@ describe("anchor-amm-q4-25", () => {
 
   });
 
+
+  it("Liquidity withdrawn!", async () => {
+
+    const tx = await program.methods.withdraw(new anchor.BN(5 * (10 ** 6)), new anchor.BN(1 * (10 ** 6)), new anchor.BN(1 * (10 ** 6))).accountsStrict({
+
+      user: depositor.publicKey,
+      mintX: mintX,
+      mintY: mintY,
+      config: configPDA,
+      mintLp: mintLP,
+      vaultX: vaultX,
+      vaultY: vaultY,
+      userX: depositorATAX,
+      userY: depositorATAY,
+      userLp: depositorMintLPATA,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      systemProgram: anchor.web3.SystemProgram.programId
+
+    }).signers([depositor]).rpc();
+
+    console.log("Your transaction signature", tx);
+
+    const depositorMintLPATAAccount = await getAccount(provider.connection, depositorMintLPATA);
+
+    expect(depositorMintLPATAAccount.amount).to.equal(BigInt(5) * BigInt(10 ** 6));
+
+  });
+
 });
