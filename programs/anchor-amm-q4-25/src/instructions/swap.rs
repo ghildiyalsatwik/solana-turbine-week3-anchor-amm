@@ -48,7 +48,7 @@ pub struct Swap<'info> {
     )]
     pub mint_lp: Account<'info, Mint>,
     pub system_program: Program<'info, System>,
-    pub associated_token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>
 
 }
@@ -79,7 +79,7 @@ impl<'info> Swap<'info> {
 
         let mut curve = ConstantProduct::init(self.vault_x.amount, self.vault_y.amount, self.mint_lp.supply, self.config.fee, Some(6)).unwrap();
 
-        let result = curve.swap(pair, amount, min).unwrap();
+        let result = curve.swap(pair, amount, min).map_err(|_| AmmError::SlippageExceeded)?;
 
         let deposit_amount = result.deposit;
 
